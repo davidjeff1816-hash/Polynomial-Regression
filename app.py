@@ -11,12 +11,12 @@ st.set_page_config(page_title="Ice Cream Sales Prediction", layout="centered")
 st.title("🍦 Ice Cream Sales Prediction (Polynomial Regression)")
 
 # ----------------------------------
-# FILE UPLOADER (FIXES ERROR)
+# FILE UPLOAD
 # ----------------------------------
-uploaded_file = st.file_uploader("Upload Ice_Cream Selling Data.csv", type=["csv"])
+uploaded_file = st.file_uploader("Upload Ice Cream CSV File", type=["csv"])
 
 if uploaded_file is None:
-    st.warning("⬆️ Please upload the Ice_Cream Selling Data.csv file")
+    st.warning("⬆️ Please upload the dataset")
     st.stop()
 
 df = pd.read_csv(uploaded_file)
@@ -25,15 +25,21 @@ st.subheader("📊 Dataset Preview")
 st.dataframe(df.head())
 
 # ----------------------------------
-# FEATURES
+# COLUMN SELECTION (KEY FIX)
 # ----------------------------------
-X = df[['Temperature']]
-y = df['Ice Cream Sales']
+st.subheader("🧾 Column Selection")
+st.write("Available columns:", list(df.columns))
+
+x_col = st.selectbox("Select Temperature column", df.columns)
+y_col = st.selectbox("Select Sales column", df.columns)
+
+X = df[[x_col]]
+y = df[y_col]
 
 # ----------------------------------
 # DEGREE
 # ----------------------------------
-degree = st.slider("Select Polynomial Degree", 1, 5, 2)
+degree = st.slider("Polynomial Degree", 1, 5, 2)
 
 # ----------------------------------
 # LINEAR REGRESSION
@@ -79,8 +85,8 @@ ax.scatter(X, y, label="Actual Data")
 ax.plot(X, y_lin_pred, label="Linear Regression")
 ax.plot(X, y_poly_pred, label=f"Polynomial (degree {degree})")
 
-ax.set_xlabel("Temperature (°C)")
-ax.set_ylabel("Ice Cream Sales")
+ax.set_xlabel(x_col)
+ax.set_ylabel(y_col)
 ax.legend()
 
 st.pyplot(fig)
@@ -90,10 +96,10 @@ st.pyplot(fig)
 # ----------------------------------
 st.subheader("🔮 Predict Sales")
 
-temp = st.number_input("Enter Temperature (°C)", 0.0, 60.0, 30.0)
+temp = st.number_input("Enter Temperature Value", float(X.min()), float(X.max()))
 
 if st.button("Predict"):
     temp_arr = np.array([[temp]])
     temp_poly = poly.transform(temp_arr)
     prediction = poly_model.predict(temp_poly)
-    st.success(f"Predicted Ice Cream Sales: {prediction[0]:.2f}")
+    st.success(f"Predicted Sales: {prediction[0]:.2f}")
